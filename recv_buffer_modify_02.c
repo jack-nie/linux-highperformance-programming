@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  char *ip =NULL;
+  char *ip = NULL;
   int nIPLen = strlen(argv[1]);
   ip = (char*)malloc(nIPLen + 1);
   memset(ip, 0, nIPLen + 1);
@@ -70,10 +70,10 @@ int main(int argc, char *argv[])
     memset(buf, 0, BUFSIZE);
     while (recv(connfd, buf, BUFSIZE, 0) > 0)
     {
-		TRACE_LINE;
+		   TRACE_LINE;
     }
     close(connfd);
-	TRACE_LINE;
+	  TRACE_LINE;
   }
   close(sock);
   TRACE_LINE;
