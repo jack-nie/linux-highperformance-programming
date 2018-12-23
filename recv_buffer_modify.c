@@ -34,10 +34,10 @@ main(int argc, char *argv[])
   int len = sizeof(recvbuf);
   setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &recvbuf, sizeof(recvbuf));
   getsockopt(sock, SOL_SOCKET, SO_SNDBUF, &recvbuf, (socklen_t*)&len);
-  printf("the tcp send buffer after set is %d", recvbuf);
+  printf("the tcp recv buffer after set is %d", recvbuf);
 
   int ret = bind(sock, (struct sockaddr*)&address, sizeof(address));
-  assert(ret > 0);
+  assert(ret != -1);
 
   ret = listen(sock, 1);
   assert(ret != -1);
