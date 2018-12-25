@@ -24,32 +24,35 @@ int main(int argc, char *argv[])
   ip = (char*)malloc(nIPLen + 1);
   memset(ip, 0, nIPLen + 1);
   memcpy(ip, argv[1], nIPLen);
-  
+
   int port = atoi(argv[2]);
   struct sockaddr_in address;
 
   address.sin_family = AF_INET;
   address.sin_port = htons(port);
   inet_pton(AF_INET, ip, &address.sin_addr);
-  goto _err;
-  
+
   TRACE_LINE;
-  
+
   int sock = socket(PF_INET, SOCK_STREAM, 0);
   TRACE_LINE;
   assert(sock > 0);
 
   int recvbuf = atoi(argv[3]);
+  printf("recvbuf: %d", recvbuf);
   int len = sizeof(recvbuf);
   setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &recvbuf, sizeof(recvbuf));
   TRACE_LINE;
   getsockopt(sock, SOL_SOCKET, SO_SNDBUF, &recvbuf, (socklen_t*)&len);
   TRACE_LINE;
-  printf("the tcp send buffer after set is %d", recvbuf);
+  printf("the tcp send buffer after set is %d\n", recvbuf);
 
   int ret = bind(sock, (struct sockaddr*)&address, sizeof(address));
   TRACE_LINE;
-  assert(ret > 0);
+  //assert(ret > 1);
+  //assert(1 > 2);
+  //abort();
+  assert(ret != -1);
 
   ret = listen(sock, 1);
   TRACE_LINE;
@@ -77,8 +80,4 @@ int main(int argc, char *argv[])
   }
   close(sock);
   TRACE_LINE;
-  
-_err:
-
-  return 0;
 }

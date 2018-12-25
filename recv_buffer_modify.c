@@ -9,6 +9,7 @@
 #include <errno.h>
 
 #define BUFSIZE 1024
+#define TRACE_LINE printf("(%d)\n", __LINE__);
 
 int
 main(int argc, char *argv[])
@@ -26,26 +27,34 @@ main(int argc, char *argv[])
   address.sin_family = AF_INET;
   address.sin_port = htons(port);
   inet_pton(AF_INET, ip, &address.sin_addr);
+  TRACE_LINE;
 
   int sock = socket(PF_INET, SOCK_STREAM, 0);
+  TRACE_LINE;
   assert(sock > 0);
 
   int recvbuf = atoi(argv[3]);
+  printf("recvbuf: %d", recvbuf);
   int len = sizeof(recvbuf);
   setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &recvbuf, sizeof(recvbuf));
+  TRACE_LINE;
   getsockopt(sock, SOL_SOCKET, SO_SNDBUF, &recvbuf, (socklen_t*)&len);
+  TRACE_LINE;
   printf("the tcp recv buffer after set is %d", recvbuf);
 
   int ret = bind(sock, (struct sockaddr*)&address, sizeof(address));
-  assert(ret != -1);
+  TRACE_LINE;
+  assert(ret > 0);
 
   ret = listen(sock, 1);
+  TRACE_LINE;
   assert(ret != -1);
 
   struct sockaddr_in client;
   int client_addr_length = sizeof(client);
 
   int connfd = accept(sock, (struct sockaddr*)&client, &client_addr_length);
+  TRACE_LINE;
   if (connfd < 0)
   {
     printf("connection failed, errno is %d", errno);
@@ -56,10 +65,12 @@ main(int argc, char *argv[])
     memset(buf, 0, BUFSIZE);
     while (recv(connfd, buf, BUFSIZE, 0) > 0)
     {
-
+      TRACE_LINE;
     }
     close(connfd);
+    TRACE_LINE;
   }
   close(sock);
+  TRACE_LINE;
   return 0;
 }
