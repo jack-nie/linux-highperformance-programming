@@ -8,6 +8,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 int
 main(int argc, char *argv[])
@@ -36,7 +37,7 @@ main(int argc, char *argv[])
 
     struct sockaddr_in client_address;
     socklen_t client_address_len = sizeof(client_address);
-    int connfd = connect(listenfd, (struct sockaddr*)&client_address, &client_address_len);
+    int connfd = connect(listenfd, (struct sockaddr*)&client_address, client_address_len);
     if (connfd < 0)
     {
         printf("errno is: %d\n", errno);

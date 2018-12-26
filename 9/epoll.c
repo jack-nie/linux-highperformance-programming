@@ -11,11 +11,12 @@
 #include <stdlib.h>
 #include <sys/epoll.h>
 #include <pthread.h>
+#include <stdbool.h>
 
 #define MAX_EVENT_NUMBER 1024
 #define BUFFER_SIZE 10
 
-int 
+int
 setnonblocking(int fd)
 {
     int old_option = fcntl(fd, F_GETFL);
@@ -27,7 +28,7 @@ setnonblocking(int fd)
 void
 addfd(int epollfd, int fd, bool enable_et)
 {
-    epoll_event event;
+    struct epoll_event event;
     event.data.fd = fd;
     event.events = EPOLLIN;
     if (enable_et)
@@ -38,11 +39,11 @@ addfd(int epollfd, int fd, bool enable_et)
     setnonblocking(fd);
 }
 
-void 
-lt(epoll_event *events, int number, int epollfd, int listenfd)
+void
+lt(struct epoll_event *events, int number, int epollfd, int listenfd)
 {
     char buf[BUFFER_SIZE];
-    for (int i = 0; i < number, i++)
+    for (int i = 0; i < number, i++;)
     {
         int sockfd = events[i].data.fd;
         if (sockfd == listenfd)
@@ -71,8 +72,8 @@ lt(epoll_event *events, int number, int epollfd, int listenfd)
     }
 }
 
-void 
-et(epoll_event *events, int number, int epollfd, int listenfd)
+void
+et(struct epoll_event *events, int number, int epollfd, int listenfd)
 {
     char buf[BUFFER_SIZE];
     for (int i = 0; i < number; i++)
@@ -82,7 +83,7 @@ et(epoll_event *events, int number, int epollfd, int listenfd)
         {
             struct sockaddr_in client_address;
             socklen_t client_address_length = sizeof(client_address);
-            int connfd = accept(sockfd, (struct sockaddr*)&client_address, &client_addreess_length);
+            int connfd = accept(sockfd, (struct sockaddr*)&client_address, &client_address_length);
             addfd(epollfd, connfd, true);
         }
         else if (events[i].events & EPOLLIN)
@@ -94,7 +95,7 @@ et(epoll_event *events, int number, int epollfd, int listenfd)
                 int ret = recv(sockfd, buf, BUFFER_SIZE-1, 0);
                 if (ret < 0)
                 {
-                    if ((errno == EAGIN) || (errno == EWOULDBLOCK))
+                    if ((errno == EAGAIN) || (errno == EWOULDBLOCK))
                     {
                         printf("read later\n");
                         break;
@@ -106,7 +107,7 @@ et(epoll_event *events, int number, int epollfd, int listenfd)
                 {
                     close(sockfd);
                 }
-                else { 
+                else {
                     printf("got %d bytes of content: %s\n", ret, buf);
                 }
             }
@@ -131,19 +132,19 @@ main(int argc, char *argv[])
     int port = atoi(argv[2]);
 
     struct sockaddr_in address;
-    bzero(%address, sizeof(address));
+    bzero(&address, sizeof(address));
     address.sin_family = AF_INET;
     address.sin_port = htons(port);
     inet_pton(AF_INET, ip, &address.sin_addr);
 
     int listenfd = socket(AF_INET, SOCK_STREAM, 0);
     assert(listenfd > 0);
-    ret = bind(listenfd, (strcut sockaddr*)&address, sizeof(address));
+    int ret = bind(listenfd, (struct sockaddr*)&address, sizeof(address));
     assert(ret != -1);
     ret = listen(listenfd, 1);
     assert(ret != -1);
 
-    epoll_event events[MAX_EVENT_NUMBER];
+    struct epoll_event events[MAX_EVENT_NUMBER];
     int epollfd = epoll_create(5);
     assert(epollfd != -1);
     addfd(epollfd, listenfd, true);
@@ -160,5 +161,4 @@ main(int argc, char *argv[])
     }
     close(listenfd);
     return 0;
-
 }
