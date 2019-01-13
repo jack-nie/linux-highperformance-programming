@@ -57,16 +57,36 @@ reset_oneshot(int epollfd, int fd)
 void*
 worker(void* arg)
 {
-  int sockfd = ((fds*)arg)->sockfd;
-  int epollfd = ((fds*)arg)->epollfd;
+  int sockfd = ((struct fds*)arg)->sockfd;
+  int epollfd = ((struct fds*)arg)->epollfd;
   printf("start new thread to reveive data on fd: %d\n", sockfd);
   char buf[BUFFER_SIZE];
-  memset(buf, '/0', BUFFER_SIZE);
+  memset(buf, '\0', BUFFER_SIZE);
   while(1)
   {
-
+    int ret = recv(sockfd, buf, BUFFER_SIZE - 1, 0);
+    if (ret == 0)
+    {
+      close(sockfd);
+      printf("foreiner closed the connection\n");
+      break;
+    }
+    else if(ret < 0)
+    {
+      if (errno == EAGAIN)
+      {
+        reset_oneshot(epollfd, sockfd);
+        printf("read later\n");
+        break;
+      }
+    }
+    else
+    {
+      printf("get content: %s\n", buf);
+      sleep(5);
+    }
   }
-
+  printf("end thread receiving data on fd: %d\n", sockfd);
 }
 
 int
@@ -97,7 +117,7 @@ main(int argc, char *argv)
     struct epoll_event events[MAX_EVENT_NUMBER];
     int epollfd = epoll_create(5);
     assert(epollfd != -1);
-    addfd(epollfd, listenfd, true);
+    addfd(epollfd, listenfd, false);
 
     while (1)
     {
@@ -107,8 +127,32 @@ main(int argc, char *argv)
             printf("epoll failed\n");
             break;
         }
-        lt(events, ret, epollfd, listenfd);
+
+        for (int i = 0; i < ret; i++)
+        {
+          int sockfd = events[i].data.fd;
+          if (sockfd == listenfd)
+          {
+            struct sockaddr_in client_address;
+            socklen_t client_address_length = sizeof(client_address);
+            int connfd = accept(listenfd, (struct sockaddr*)&client_address, &client_address_length);
+            addfd(epollfd, connfd, true);
+          }
+          else if (events[i].events & EPOLLIN)
+          {
+            pthread_t thread;
+            struct fds fds_for_new_worker;
+            fds_for_new_worker.epollfd = epollfd;
+            fds_for_new_worker.sockfd = sockfd;
+            pthread_create(&thread, NULL, worker, (void*)&fds_for_new_worker);
+          }
+          else
+          {
+            printf("something else happend");
+          }
+        }
     }
+
     close(listenfd);
     return 0;
 }
