@@ -13,7 +13,7 @@ union semun
 
 };
 
-  void
+void
 pv(int sem_id, int op)
 {
   struct sembuf sem_b;
@@ -23,7 +23,7 @@ pv(int sem_id, int op)
   semop(sem_id, &sem_b, 1);
 }
 
-  int
+int
 main(int argc, char* argv[])
 {
   int sem_id = semget(IPC_PRIVATE, 1, 0666);
