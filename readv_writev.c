@@ -15,7 +15,7 @@
 
 static const char *status_line[2] = {"200 OK!", "500 Internal server error!"};
 
-int 
+int
 main(int argc, char *argv[])
 {
     if (argc <= 3)
@@ -48,7 +48,7 @@ main(int argc, char *argv[])
     socklen_t client_addr_length = sizeof(client);
 
     int connfd = accept(sock, (struct sockaddr*)&client, &client_addr_length);
-    if (connfd < 0) 
+    if (connfd < 0)
     {
         printf("connection failed, errno is: %d", errno);
     }
@@ -99,7 +99,7 @@ main(int argc, char *argv[])
             iv[1].iov_len = file_stat.st_size;
             ret = writev(connfd, iv, 2);
         }
-        else 
+        else
         {
             ret = snprintf(header_buf, BUFSIZE -1, "%s %s\r\n", "HTTP/1.1", status_line[1]);
             len += ret;
