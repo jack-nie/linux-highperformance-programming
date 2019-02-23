@@ -18,7 +18,7 @@ send_fd(int fd, int fd_to_send)
   msg.msg_accrights = (void*)&fd_to_send;
   msg.msg_accrightslen = sizeof(int);
 #else
-  struct csmghdr *cm;
+  struct cmsghdr *cm;
   char anc_buffer[CMSG_SPACE(sizeof(int))];
   char* d_ptr;
   msg.msg_controllen = sizeof(anc_buffer);
