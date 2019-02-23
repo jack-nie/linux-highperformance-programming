@@ -16,12 +16,12 @@
 #define BUFFER_SIZE 64
 #define FD_LIMIT 65535
 
-struct client_data
+typedef struct
 {
     struct sockaddr_in address;
     char *write_buf;
     char buf[BUFFER_SIZE];
-};
+} client_data;
 
 int
 setnoblocking(int fd)
@@ -32,10 +32,10 @@ setnoblocking(int fd)
     return old_option;
 }
 
-int 
+int
 main(int argc, char *argv[])
 {
-    if (argc <= 2) 
+    if (argc <= 2)
     {
         printf("usage: %s ip_address port_number", argv[0]);
         return 1;
@@ -54,10 +54,10 @@ main(int argc, char *argv[])
 
     ret = bind(listenfd, (struct sockaddr*)&address, sizeof(address));
     assert(ret != -1);
-    
+
     ret = listen(listenfd, 5);
     assert(ret != -1);
-    struct client_data *users = client_data[FD_LIMIT];
+    client_data *users = malloc(sizeof(client_data)*FD_LIMIT);
     struct pollfd fds[USER_LIMIT+1];
     int user_counter = 0;
     for (int i = 1; i <= USER_LIMIT; i++)
@@ -146,7 +146,7 @@ main(int argc, char *argv[])
                 {
 
                 }
-                else 
+                else
                 {
                     for (int j = 1; j <= user_counter; j++)
                     {
@@ -156,7 +156,7 @@ main(int argc, char *argv[])
                         }
                         fds[j].events |= ~POLLIN;
                         fds[j].events |= POLLOUT;
-                        users[fds[j].fd].write_bu = users[connfd].buf;
+                        users[fds[j].fd].write_buf = users[connfd].buf;
                     }
                 }
             }
